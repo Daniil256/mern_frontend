@@ -8,7 +8,7 @@ import { TagsBlock } from '../components/TagsBlock';
 import { CommentsBlock } from '../components/CommentsBlock';
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPosts, fetchTags } from '../redux/slices/posts';
-import { fetchUserData } from '../redux/slices/auth';
+import { baseURL } from '../axios';
 export const Home = () => {
   const dispatch = useDispatch()
   const { posts, tags } = useSelector(state => state.posts)
@@ -35,7 +35,7 @@ export const Home = () => {
               <Post
                 id={obj._id}
                 title={obj.title}
-                imageUrl={obj.imageUrl && `${process.env.REACT_APP_API_URL}${obj.imageUrl}`}
+                imageUrl={obj.imageUrl && baseURL + obj.imageUrl}
                 user={obj.user}
                 createdAt={obj.createdAt}
                 viewsCount={obj.viewsCount}

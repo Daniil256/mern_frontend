@@ -4,7 +4,7 @@ import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
 import SimpleMDE from 'react-simplemde-editor'
 
-import axios from '../../../axios'
+import axios, { baseURL } from '../../axios'
 import 'easymde/dist/easymde.min.css'
 import styles from './AddPost.module.scss'
 import { selectIsAuth } from '../../redux/slices/auth'
@@ -101,7 +101,7 @@ export const AddPost = () => {
           <Button variant="contained" color="error" onClick={onClickRemoveImage}>
             Удалить
           </Button>
-          <img className={styles.image} src={`${process.env.REACT_APP_API_URL}${imageUrl}`} alt="Uploaded" />
+          <img className={styles.image} src={baseURL + imageUrl} alt="Uploaded" />
         </>
       )}
       <br />
