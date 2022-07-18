@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const baseURL = 'kryuchkov-mern.herokuapp.com'
+export const baseURL = 'https://kryuchkov-mern.herokuapp.com/'
 // export const baseURL = process.env.REACT_APP_API_URL
 
 const instance = axios.create({
