@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
@@ -6,29 +6,37 @@ import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 
 import styles from './Login.module.scss';
-import { fetchRegister, selectIsAuth } from '../../redux/slices/auth';
-import { useSelector } from 'react-redux';
+import { fetchRegister, } from '../../redux/slices/auth';
 import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
+import { Navigate } from 'react-router';
+import isAuth from '../../utils/isAuth';
 
 export const Registration = () => {
-  const isAuth = useSelector(selectIsAuth)
+  const [isErrorLogin, setIsErrorLogin] = useState('')
   const dispatch = useDispatch()
   const { register, handleSubmit, setError, formState: { errors, isValid } } = useForm({
     defaultValues: {
       fullName: 'danya',
-      email: 'daniil123@sowbaka.ru',
       password: '12345',
     },
     // onChange при отправке, all всегда
     mode: 'onChange'
   })
-
   const onSubmit = async (values) => {
     const data = await dispatch(fetchRegister(values))
-    // if (data.payload.token) {
-    //   window.localStorage.setItem('token', data.payload.token)
-    // }
+    if (data.error) {
+      if (data.error.message === 'Request failed with status code 402') {
+        return setIsErrorLogin('Такое имя уже существует')
+      }
+      return setIsErrorLogin('Ошибка регистрации')
+    }
+    if (data.payload.token) {
+      window.localStorage.setItem('token', data.payload.token)
+    }
+  }
+  if (isAuth()) {
+    return <Navigate to="/" />
   }
   return (
     <Paper classes={{ root: styles.root }}>
@@ -50,15 +58,6 @@ export const Registration = () => {
           fullWidth />
 
         <TextField
-          label="E-Mail"
-          error={Boolean(errors.email?.message)}
-          helperText={errors.email?.message}
-          {...register('email', { required: 'Укажите почту' })}
-          type="email"
-          className={styles.field}
-          fullWidth />
-
-        <TextField
           label="Password"
           error={Boolean(errors.password?.message)}
           helperText={errors.password?.message}
@@ -66,11 +65,11 @@ export const Registration = () => {
           type="password"
           fullWidth
           className={styles.field} />
-        <Button disabled={!isValid} size="large" type="submit" variant="contained"
-          fullWidth>
+        <Button disabled={!isValid} size="large" type="submit" variant="contained" fullWidth >
           Зарегистрироваться
         </Button>
       </form>
+      <span style={{ fontWeight: 600 }} >{isErrorLogin}</span>
     </Paper>
   );
 };

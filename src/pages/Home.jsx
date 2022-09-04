@@ -7,67 +7,81 @@ import { Post } from '../components/Post';
 import { TagsBlock } from '../components/TagsBlock';
 import { CommentsBlock } from '../components/CommentsBlock';
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPosts, fetchTags } from '../redux/slices/posts';
-import { baseURL } from '../axios';
+import { fetchPopulatePosts, fetchPosts, fetchTags } from '../redux/slices/posts';
+import { fetchAllComments } from '../redux/slices/comments';
+import { baseURL } from '../utils/axios';
+import { useState } from 'react';
+import { useParams } from 'react-router';
+import { AddPost } from './AddPost';
+
 export const Home = () => {
+  const [category, setCategory] = useState(0)
+  const { add_note } = useParams()
   const dispatch = useDispatch()
   const { posts, tags } = useSelector(state => state.posts)
+  const { comments } = useSelector(state => state)
   const userData = useSelector(state => state.auth.data)
-
   const isPostLoading = posts.status === 'Loading'
   const isTagsLoading = tags.status === 'Loading'
+  const isCommentsLoading = comments.status === 'Loading'
   useEffect(() => {
     dispatch(fetchPosts())
     dispatch(fetchTags())
+    dispatch(fetchAllComments())
   }, [])
+  const switchCategory = (value) => {
+    if (value === category) return
+    setCategory(value)
+    if (value === 0) {
+      dispatch(fetchPosts())
+    }
+    if (value === 1) {
+      dispatch(fetchPopulatePosts())
+    }
+  }
   return (
-    <>
-      <Tabs style={{ marginBottom: 15 }} value={0} aria-label="basic tabs example">
-        <Tab label="Новые" />
-        <Tab label="Популярные" />
-      </Tabs>
-      <Grid container spacing={4}>
-        <Grid xs={8} item>
-          {(isPostLoading ? [...Array(5)] : posts.items).map((obj, index) =>
-            isPostLoading ? (
-              <Post key={index} isLoading={true} />
-            ) : (
-              <Post
-                id={obj._id}
-                title={obj.title}
-                imageUrl={obj.imageUrl && baseURL + obj.imageUrl}
-                user={obj.user}
-                createdAt={obj.createdAt}
-                viewsCount={obj.viewsCount}
-                commentsCount={3}
-                tags={obj.tags}
-                isEditable={userData?._id === obj.user._id}
-              />
-            ))}
+    posts.message && !posts.items.length
+      ?
+      <span style={{ fontWeight: 900 }}>Ошибка загрузки постов</span>
+      :
+      <>
+        <Tabs style={{ marginBottom: 15 }} value={category} aria-label="basic tabs example">
+          <Tab label="Новые" onClick={() => switchCategory(0)} />
+          <Tab label="Популярные" onClick={() => switchCategory(1)} />
+        </Tabs>
+        <Grid container spacing={2}>
+          <Grid xs={10} container wrap='wrap' item>
+
+            {isPostLoading
+              ?
+              [...Array(5)].map((_, i) =>
+                <Post key={i} isLoading={true} />)
+              :
+              posts.items.map(obj =>
+                <Post
+                  title={obj.title}
+                  key={obj._id}
+                  id={obj._id}
+                  text={obj.text}
+                  imageUrl={obj.imageUrl && baseURL + obj.imageUrl}
+                  tags={obj.tags}
+                  user={obj?.user || userData}
+                  createdAt={obj?.createdAt || Date.now()}
+                  changedAt={obj?.changedAt || ''}
+                  viewsCount={obj?.viewsCount || []}
+                  commentsCount={obj?.commentsCount || 0}
+                  isEditable={userData?._id === obj.user?._id}
+                />)}
+            {add_note && <AddPost />}
+          </Grid>
+          <Grid xs={2} item>
+            <TagsBlock items={tags.items} isLoading={isTagsLoading} />
+            <CommentsBlock
+              comments={comments.comments}
+              isLoading={isCommentsLoading}
+            />
+          </Grid>
         </Grid>
-        <Grid xs={4} item>
-          <TagsBlock items={tags.items} isLoading={isTagsLoading} />
-          <CommentsBlock
-            items={[
-              {
-                user: {
-                  fullName: 'Вася Пупкин',
-                  avatarUrl: 'https://mui.com/static/images/avatar/1.jpg',
-                },
-                text: 'Это тестовый комментарий',
-              },
-              {
-                user: {
-                  fullName: 'Иван Иванов',
-                  avatarUrl: 'https://mui.com/static/images/avatar/2.jpg',
-                },
-                text: 'When displaying three lines or more, the avatar is not aligned at the top. You should set the prop to align the avatar at the top',
-              },
-            ]}
-            isLoading={false}
-          />
-        </Grid>
-      </Grid>
-    </>
+      </>
   );
 };

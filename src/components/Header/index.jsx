@@ -4,43 +4,46 @@ import Button from '@mui/material/Button';
 import styles from './Header.module.scss';
 import Container from '@mui/material/Container';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { logout, selectIsAuth } from '../../redux/slices/auth';
+import { logout } from '../../redux/slices/auth';
 import { useDispatch } from 'react-redux';
+import isAuth from '../../utils/isAuth';
+import { fetchPosts, fetchTags } from '../../redux/slices/posts';
+import { fetchAllComments } from '../../redux/slices/comments';
 
 export const Header = () => {
   const dispatch = useDispatch()
-  const isAuth = useSelector(selectIsAuth)
 
   const onClickLogout = () => {
     dispatch(logout())
     window.localStorage.removeItem('token')
-  };
+  }
+
+  const reloadPosts = () => {
+    dispatch(fetchPosts())
+    dispatch(fetchTags())
+    dispatch(fetchAllComments())
+  }
 
   return (
     <div className={styles.root}>
       <Container maxWidth="lg">
         <div className={styles.inner}>
-          <Link className={styles.logo} to="/">
-            <div>ARCHAKOV BLOG</div>
-          </Link>
+          <Link to='/' className={styles.logo} onClick={reloadPosts}>Времени.net</Link>
           <div className={styles.buttons}>
-            {isAuth ? (
+            {isAuth() ? (
               <>
-                <Link to="/add-post">
-                  <Button variant="contained">Написать статью</Button>
+                <Link to="/add_note">
+                  <Button >Создать заметку</Button>
                 </Link>
-                <Button onClick={onClickLogout} variant="contained" color="error">
-                  Выйти
-                </Button>
+                <Button onClick={onClickLogout}>Выйти</Button>
               </>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="outlined">Войти</Button>
+                  <Button >Войти</Button>
                 </Link>
                 <Link to="/register">
-                  <Button variant="contained">Создать аккаунт</Button>
+                  <Button >Создать аккаунт</Button>
                 </Link>
               </>
             )}

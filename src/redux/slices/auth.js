@@ -1,11 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import axios from '../../axios'
+import axios from '../../utils/axios'
 
 export const fetchAuth = createAsyncThunk('auth/fetchAuth', async (params) => {
     const { data } = await axios.post('/auth/login', params)
     return data
 })
-
 export const fetchRegister = createAsyncThunk('auth/fetchRegister', async (params) => {
     const { data } = await axios.post('/auth/register', params)
     return data
@@ -30,6 +29,7 @@ const authSlice = createSlice({
         }
     },
     extraReducers: {
+
         [fetchAuth.pending]: (state) => {
             state.data = null
             state.status = 'Loading'
@@ -40,8 +40,8 @@ const authSlice = createSlice({
         },
         [fetchAuth.rejected]: (state, err) => {
             state.data = null
-            console.log(err);
             state.status = 'error'
+            state.message = err
         },
 
         [fetchAuthMe.pending]: (state) => {
@@ -54,7 +54,6 @@ const authSlice = createSlice({
         },
         [fetchAuthMe.rejected]: (state, err) => {
             state.data = null
-            console.log(err);
             state.status = 'error'
         },
 
@@ -68,7 +67,7 @@ const authSlice = createSlice({
         },
         [fetchRegister.rejected]: (state, err) => {
             state.data = null
-            console.log(err);
+            // console.log(err);
             state.status = 'error'
         },
     }

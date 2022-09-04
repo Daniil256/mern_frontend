@@ -11,8 +11,8 @@
 }
 
 .userName {
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 900;
+  font-size: 25px;
 }
 
 .userDetails {
@@ -23,4 +23,7 @@
 .additional {
   font-size: 12px;
   opacity: 0.6;
+  span {
+    margin-right: 10px;
+  }
 }

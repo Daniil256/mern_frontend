@@ -1,0 +1,16 @@
+$white: rgb(251, 251, 251);
+$dark: rgb(41, 54, 73);
+.TagsBlock {
+    .tag {
+        cursor: pointer;
+        color: $dark;
+        display: inline-block;
+        line-height: 0.8;
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-weight: 600;
+        &:hover {
+            transform: scale(1.2);
+        }
+    }
+}

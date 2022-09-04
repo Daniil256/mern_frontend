@@ -1,35 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Navigate } from "react-router";
 import styles from "./Login.module.scss";
 import { useForm } from "react-hook-form";
-import { fetchAuth, selectIsAuth } from "../../redux/slices/auth";
+import { fetchAuth } from "../../redux/slices/auth";
+import isAuth from "../../utils/isAuth";
 
 export const Login = () => {
-  const isAuth = useSelector(selectIsAuth)
   const dispatch = useDispatch()
+  const [isErrorLogin, setIsErrorLogin] = useState(false)
   const { register, handleSubmit, setError, formState: { errors, isValid } } = useForm({
     defaultValues: {
-      email: 'daniil123@sowbaka.ru',
+      fullName: 'Danya',
       password: '12345',
     },
     // onChange при отправке, all всегда
     mode: 'onChange'
   })
 
-  if (isAuth) {
+  if (isAuth()) {
     return <Navigate to="/" />
   }
   const onSubmit = async (values) => {
     const data = await dispatch(fetchAuth(values))
+    if (data.error) setIsErrorLogin(true)
     if (data.payload.token) {
       window.localStorage.setItem('token', data.payload.token)
     }
+
   }
   return (
     <Paper classes={{ root: styles.root }}>
@@ -38,14 +41,14 @@ export const Login = () => {
       </Typography>
       <form onSubmit={handleSubmit(onSubmit)}>
         <TextField
+          error={Boolean(errors.fullName?.message)}
+          helperText={errors.fullName?.message}
+          {...register('fullName', { required: 'Укажите полное имя' })}
+          type="fullName"
           className={styles.field}
-          label="E-Mail"
-          error={Boolean(errors.email?.message)}
-          helperText={errors.email?.message}
-          {...register('email', { required: 'Укажите почту' })}
-          type="email"
-          fullWidth
-        />
+          label="Полное имя"
+          fullWidth />
+
         <TextField
           className={styles.field}
           label="Пароль"
@@ -59,6 +62,9 @@ export const Login = () => {
           Войти
         </Button>
       </form>
+      {isErrorLogin &&
+        <span style={{ fontWeight: 600 }} >Неверный логин или пароль</span>
+      }
     </Paper>
   );
 };

@@ -1,39 +1,38 @@
 import React from "react";
-
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import TagIcon from "@mui/icons-material/Tag";
-import ListItemText from "@mui/material/ListItemText";
 import Skeleton from "@mui/material/Skeleton";
+import styles from './TagsBlock.module.scss'
+import { useDispatch } from "react-redux";
+import { fetchPostsSortByTag } from "../redux/slices/posts";
+import { useNavigate } from "react-router";
 
-import { SideBlock } from "./SideBlock";
+export const TagsBlock = ({ items, isLoading, isEditable, setTags }) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
-export const TagsBlock = ({ items, isLoading = true }) => {
+  const postsSortByTag = (tagName) => {
+    if (isEditable) {
+      const index = items.indexOf(tagName)
+      items.splice(index, 1)
+      setTags([...items])
+    } else {
+      navigate(`/`)
+      dispatch(fetchPostsSortByTag(tagName.replace(/#/, '')))
+    }
+  }
   return (
-    <SideBlock title="Тэги">
-      <List>
-        {(isLoading ? [...Array(5)] : items).map((name, i) => (
-          <a
-            style={{ textDecoration: "none", color: "black" }}
-            href={`/tags/${name}`}
-          >
-            <ListItem key={i} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <TagIcon />
-                </ListItemIcon>
-                {isLoading ? (
-                  <Skeleton width={100} />
-                ) : (
-                  <ListItemText primary={name} />
-                )}
-              </ListItemButton>
-            </ListItem>
-          </a>
-        ))}
-      </List>
-    </SideBlock>
+    <div className={styles.TagsBlock}>
+      {isLoading
+        ?
+        [...Array(10)].map((_, i) =>
+          <Skeleton width={100} style={{ width: 100, display: 'inline-block', margin: 5 }} key={i} height={20} />
+        )
+        :
+        items.map(name =>
+          <span className={styles.tag} key={name} onClick={() => postsSortByTag(name)}>
+            {name}
+          </span>
+        )
+      }
+    </div>
   );
 };

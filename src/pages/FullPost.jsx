@@ -1,27 +1,37 @@
 import React, { useEffect, useState } from "react";
-import axios, { baseURL } from '../axios'
+import axios, { baseURL } from '../utils/axios'
 import { Post } from "../components/Post";
-import { Index } from "../components/AddComment";
 import { CommentsBlock } from "../components/CommentsBlock";
 import { useParams } from "react-router";
 import ReactMarkdown from "react-markdown";
+import { Index } from '../components/AddComment/index'
+import { useSelector } from "react-redux";
 
 export const FullPost = () => {
   const [data, setData] = useState({})
-  const [isLoading, setIsLoading] = useState(true)
+  const userData = useSelector(state => state.auth.data)
+  const [isLoadingPost, setIsLoadingPost] = useState(true)
+  const [isLoadingComs, setIsLoadingComs] = useState(true)
+  const [comments, setComments] = useState([])
 
   const { id } = useParams()
+
   useEffect(() => {
-    axios.get(`/posts/${id}`)
+    axios.put(`/posts/${id}`, userData)
       .then(res => {
         setData(res.data)
-        setIsLoading(false)
+        setIsLoadingPost(false)
       })
       .catch(err => console.log('Ошибка получения статьи ' + err))
+    axios.get(`/comments/${id}`)
+      .then(res => {
+        setComments(res.data)
+        setIsLoadingComs(false)
+      })
+      .catch(err => console.log('Ошибка получения комментов ' + err))
   }, [])
-
-  if (isLoading) {
-    return <Post isLoading={isLoading} isFullPost />
+  if (isLoadingPost) {
+    return <Post isLoading={isLoadingPost} isFullPost />
   }
   return (
     <>
@@ -32,32 +42,15 @@ export const FullPost = () => {
         user={data.user}
         createdAt={data.createdAt}
         viewsCount={data.viewsCount}
-        commentsCount={3}
+        commentsCount={comments.length}
         tags={data.tags}
+        isEditable={userData?._id === data.user._id}
         isFullPost
       >
         <ReactMarkdown children={data.text} />
       </Post>
-      <CommentsBlock
-        items={[
-          {
-            user: {
-              fullName: "Вася Пупкин",
-              avatarUrl: "https://mui.com/static/images/avatar/1.jpg",
-            },
-            text: "Это тестовый комментарий 555555",
-          },
-          {
-            user: {
-              fullName: "Иван Иванов",
-              avatarUrl: "https://mui.com/static/images/avatar/2.jpg",
-            },
-            text: "When displaying three lines or more, the avatar is not aligned at the top. You should set the prop to align the avatar at the top",
-          },
-        ]}
-        isLoading={false}
-      >
-        <Index />
+      <CommentsBlock comments={comments} isLoading={isLoadingComs} isFullPost >
+        <Index comments={comments} setComments={setComments} />
       </CommentsBlock>
     </>
   );

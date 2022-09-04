@@ -17,7 +17,12 @@
 }
 
 .tags {
-  margin: 15px 0;
+  margin-right: 10px;
+  padding: 5px;
+  border: 3px solid rgb(205, 229, 255);
+  border-radius: 10px;
+  font-weight: 600;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .editor {
