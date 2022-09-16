@@ -1,8 +1,9 @@
 import React from 'react';
 import clsx from 'clsx';
-import DeleteIcon from '@mui/icons-material/Clear';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import EyeIcon from '@mui/icons-material/RemoveRedEyeOutlined';
+import OpenInNewOutlinedIcon from '@mui/icons-material/OpenInNewOutlined';
 import CommentIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import ReactMarkdown from "react-markdown";
 
@@ -49,13 +50,16 @@ export const Post = ({
   }
   return (
     <div className={clsx(styles.root, { [styles.rootFull]: isFullPost }, { [styles.rootImage]: imageUrl })}>
+        <div className={styles.editButtons}>
+          {!isFullPost&&<Link to={`/posts/${id}`}><OpenInNewOutlinedIcon/></Link>}
       {isEditable
         &&
-        <div className={styles.editButtons}>
-          <EditIcon onClick={onClickEdit} />
-          <DeleteIcon onClick={onClickRemove} />
+        <>
+          <EditIcon onClick={onClickEdit} fontSize="small"/>
+          <DeleteOutlinedIcon onClick={onClickRemove} />
+        </>
+        }
         </div>
-      }
       {imageUrl && (
         <img
           className={clsx(styles.image, { [styles.imageFull]: isFullPost })}
@@ -66,10 +70,10 @@ export const Post = ({
       <div className={styles.wrapper}>
         <UserInfo {...user} createdAt={createdAt} changedAt={changedAt} />
         <div className={styles.indention}>
-          <h2 className={clsx(styles.title, { [styles.titleFull]: isFullPost })}>
-            {isFullPost ? title : <Link to={`/posts/${id}`}>{title}</Link>}
-          </h2>
-          {!isFullPost && <ReactMarkdown className={styles.text} children={text} />}
+            <h2 className={clsx(styles.title, { [styles.titleFull]: isFullPost })}>
+              {title}
+            </h2>
+            {!isFullPost && <ReactMarkdown className={styles.text} children={text} />}
           <ul className={styles.tags}>
             <TagsBlock items={tags} />
           </ul>
@@ -86,7 +90,7 @@ export const Post = ({
               <AvatarGroup max={4}>
                 {
                   viewsCount.map(item =>
-                    item.avatarUrl.length
+                    item.avatarUrl?.length
                       ?
                       <Avatar
                         key={item._id}

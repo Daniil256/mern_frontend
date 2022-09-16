@@ -5,14 +5,15 @@ $dark: rgb(41, 54, 73);
     "Helvetica Neue", sans-serif !important;
   color: $dark;
   line-height: 1.2;
+  user-select: none;
 }
 html,
 body {
+  background-color:$white;
   height: 100%;
 }
 body {
   margin: 0;
-  background-color: $white;
 }
 a {
   text-decoration: none;

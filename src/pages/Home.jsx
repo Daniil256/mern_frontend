@@ -39,7 +39,7 @@ export const Home = () => {
       dispatch(fetchPopulatePosts())
     }
   }
-  return (
+    return (
     posts.message && !posts.items.length
       ?
       <span style={{ fontWeight: 900 }}>Ошибка загрузки постов</span>

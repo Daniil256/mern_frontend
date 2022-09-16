@@ -15,9 +15,8 @@ export const FullPost = () => {
   const [comments, setComments] = useState([])
 
   const { id } = useParams()
-
   useEffect(() => {
-    axios.put(`/posts/${id}`, userData)
+      axios.put(`/posts/${id}`, userData)
       .then(res => {
         setData(res.data)
         setIsLoadingPost(false)

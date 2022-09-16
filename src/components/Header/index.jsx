@@ -28,12 +28,15 @@ export const Header = () => {
     <div className={styles.root}>
       <Container maxWidth="lg">
         <div className={styles.inner}>
-          <Link to='/' className={styles.logo} onClick={reloadPosts}>Времени.net</Link>
+          <Link to='/' className={styles.logo} onClick={reloadPosts}>
+            Времени.net
+          <span className={styles.border}></span>
+            </Link>
           <div className={styles.buttons}>
             {isAuth() ? (
               <>
                 <Link to="/add_note">
-                  <Button >Создать заметку</Button>
+                  <Button>Создать заметку</Button>
                 </Link>
                 <Button onClick={onClickLogout}>Выйти</Button>
               </>

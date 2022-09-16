@@ -3,17 +3,26 @@ import TextField from '@mui/material/TextField'
 import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
 import SimpleMDE from 'react-simplemde-editor'
+import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
+import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
+import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
+import HideImageIcon from '@mui/icons-material/HideImage';
+import clsx from 'clsx';
 
 import axios, { baseURL } from '../../utils/axios'
 import 'easymde/dist/easymde.min.css'
 import styles from './AddPost.module.scss'
 import { Navigate, useNavigate, useParams } from 'react-router'
 import isAuth from '../../utils/isAuth'
-import { TagsBlock } from '../../components'
+import { TagsBlock, UserInfo } from '../../components'
 import { fetchCreatePost, fetchPosts } from '../../redux/slices/posts'
-import { useDispatch } from 'react-redux'
+import { useDispatch,useSelector} from 'react-redux'
+import ReactMarkdown from 'react-markdown'
 
 export const AddPost = () => {
+  const user = useSelector(state => state.auth.data)
+
+
   const inputFileRef = React.useRef(null)
   const { id } = useParams()
 
@@ -66,6 +75,9 @@ export const AddPost = () => {
   const onClickRemoveImage = () => {
     setImageUrl('')
   }
+  const onHomeLocate = ()=>{
+    navigate('/')
+  }
 
   const onChange = React.useCallback((value) => {
     setText(value)
@@ -111,25 +123,70 @@ export const AddPost = () => {
     return <Navigate to="/" />
   }
   return (
-    <Paper style={{ padding: 30 }}>
-      {error &&
-        <div style={{ fontWeight: 600, margin: '10px 0' }}>{error}</div>
-      }
-      <input type="file" id="input" ref={inputFileRef} onChange={handleChangeFile} hidden />
-      <Button variant="outlined" size="large" onClick={() => inputFileRef.current.click()}>
-        Загрузить превью
-      </Button>
-      {imageUrl && (
-        <>
-          <Button variant="contained" color="error" onClick={onClickRemoveImage}>
-            Удалить
-          </Button>
-          <img className={styles.image} src={baseURL + imageUrl} alt="Uploaded" />
-        </>
-      )}
-      <br />
-      <br />
-      <TextField
+    // <Paper style={{ padding: 30 }}>
+    //   {error &&
+    //     <div style={{ fontWeight: 600, margin: '10px 0' }}>{error}</div>
+    //   }
+    //   <input type="file" id="input" ref={inputFileRef} onChange={handleChangeFile} hidden />
+    //   <Button variant="outlined" size="large" onClick={() => inputFileRef.current.click()}>
+    //     Загрузить превью
+    //   </Button>
+    //   {imageUrl && (
+    //     <>
+    //       <Button variant="contained" color="error" onClick={onClickRemoveImage}>
+    //         Удалить
+    //       </Button>
+    //       <img className={styles.image} src={baseURL + imageUrl} alt="Uploaded" />
+    //     </>
+    //   )}
+    //   <br />
+    //   <br />
+    //   <TextField
+    //     classes={{ root: styles.title }}
+    //     variant="standard"
+    //     placeholder="Заголовок статьи..."
+    //     value={title}
+    //     onChange={(e) => setTitle(e.target.value)}
+    //     fullWidth
+    //   />
+    //   <TagsBlock items={tags} isEditable setTags={setTags} />
+
+    //   <TextField
+    //     classes={{ root: styles.tags }}
+    //     variant="standard"
+    //     placeholder="Тэги"
+    //     value={tag}
+    //     onChange={(e) => onChangeTags(e.target.value)}
+    //     fullWidth />
+    //   <SimpleMDE className={styles.editor} value={text} onChange={onChange} options={options} />
+    //   <div className={styles.buttons}>
+    //     <Button size="large" variant="contained" onClick={onSubmit} disabled={!text}>
+    //       {id ? 'Сохранить' : 'Опубликовать'}
+    //     </Button>
+    //     <a href="/">
+    //       <Button size="large">Отмена</Button>
+    //     </a>
+    //   </div>
+    // </Paper>
+    <div className={clsx(styles.root, { [styles.rootFull]: false }, { [styles.rootImage]: imageUrl })}>
+     <div className={styles.buttons}>
+        <input type="file" id="input" ref={inputFileRef} onChange={handleChangeFile} hidden />
+        <ImageRoundedIcon onClick={() => inputFileRef.current.click()}/>
+        <SaveRoundedIcon onClick={onSubmit} disabled={!text}/>
+        <CancelRoundedIcon onClick={onHomeLocate}/>
+        <HideImageIcon onClick={onClickRemoveImage}/>
+      </div>
+    
+    {imageUrl && (
+      <img
+        className={clsx(styles.image, { [styles.imageFull]: false })}
+        src={imageUrl}
+        alt={title}
+      />
+    )}
+    <div className={styles.wrapper}>
+      <div className={styles.indention}>
+        <TextField
         classes={{ root: styles.title }}
         variant="standard"
         placeholder="Заголовок статьи..."
@@ -147,14 +204,10 @@ export const AddPost = () => {
         onChange={(e) => onChangeTags(e.target.value)}
         fullWidth />
       <SimpleMDE className={styles.editor} value={text} onChange={onChange} options={options} />
-      <div className={styles.buttons}>
-        <Button size="large" variant="contained" onClick={onSubmit} disabled={!text}>
-          {id ? 'Сохранить' : 'Опубликовать'}
-        </Button>
-        <a href="/">
-          <Button size="large">Отмена</Button>
-        </a>
-      </div>
-    </Paper>
+
+    </div>
+  </div>
+  </div>
+
   )
 }
