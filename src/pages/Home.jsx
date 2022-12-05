@@ -9,37 +9,41 @@ import { CommentsBlock } from '../components/CommentsBlock';
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPopulatePosts, fetchPosts, fetchTags } from '../redux/slices/posts';
 import { fetchAllComments } from '../redux/slices/comments';
-import { baseURL } from '../utils/axios';
 import { useState } from 'react';
-import { useParams } from 'react-router';
 import { AddPost } from './AddPost';
 
-export const Home = () => {
-  const [category, setCategory] = useState(0)
-  const { add_note } = useParams()
+export const Home = ({ setIsAddNote, isAddNote }) => {
+
   const dispatch = useDispatch()
+
+  const [category, setCategory] = useState(0)
   const { posts, tags } = useSelector(state => state.posts)
   const { comments } = useSelector(state => state)
   const userData = useSelector(state => state.auth.data)
   const isPostLoading = posts.status === 'Loading'
   const isTagsLoading = tags.status === 'Loading'
   const isCommentsLoading = comments.status === 'Loading'
+  // console.log(posts);
   useEffect(() => {
     dispatch(fetchPosts())
     dispatch(fetchTags())
     dispatch(fetchAllComments())
   }, [])
+
   const switchCategory = (value) => {
-    if (value === category) return
     setCategory(value)
-    if (value === 0) {
-      dispatch(fetchPosts())
-    }
-    if (value === 1) {
-      dispatch(fetchPopulatePosts())
+    switch (value) {
+      case category:
+        return
+      case 0:
+        dispatch(fetchPosts())
+      case 1:
+        dispatch(fetchPopulatePosts())
+      default:
+        return
     }
   }
-    return (
+  return (
     posts.message && !posts.items.length
       ?
       <span style={{ fontWeight: 900 }}>Ошибка загрузки постов</span>
@@ -57,13 +61,14 @@ export const Home = () => {
               [...Array(5)].map((_, i) =>
                 <Post key={i} isLoading={true} />)
               :
-              posts.items.map(obj =>
+              posts.items.map((obj, index) =>
                 <Post
-                  title={obj.title}
+                  index={index}
                   key={obj._id}
                   id={obj._id}
+                  title={obj.title}
                   text={obj.text}
-                  imageUrl={obj.imageUrl && baseURL + obj.imageUrl}
+                  imageUrl={obj.imageUrl ? obj.imageUrl: ''}
                   tags={obj.tags}
                   user={obj?.user || userData}
                   createdAt={obj?.createdAt || Date.now()}
@@ -71,8 +76,12 @@ export const Home = () => {
                   viewsCount={obj?.viewsCount || []}
                   commentsCount={obj?.commentsCount || 0}
                   isEditable={userData?._id === obj.user?._id}
+                  setIsAddNote={setIsAddNote}
+                  isAddNote={isAddNote}
+
+                  status={obj.status}
                 />)}
-            {add_note && <AddPost />}
+            {isAddNote && <AddPost setIsAddNote={setIsAddNote} isAddNote={isAddNote} />}
           </Grid>
           <Grid xs={2} item>
             <TagsBlock items={tags.items} isLoading={isTagsLoading} />

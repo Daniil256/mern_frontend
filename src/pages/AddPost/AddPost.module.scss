@@ -1,76 +1,9 @@
-// .title {
-//   input {
-//     font-size: 42px;
-//     font-weight: 900;
-//   }
-
-//   div {
-//     &:before,
-//     &:after {
-//       display: none;
-//     }
-//   }
-// }
-
-// .image {
-//   width: 100%;
-// }
-
-// .tags {
-//   margin-right: 10px;
-//   padding: 5px;
-//   border: 3px solid rgb(205, 229, 255);
-//   border-radius: 10px;
-//   font-weight: 600;
-//   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-// }
-
-// .editor {
-//   margin: 30px -30px;
-
-//   :global {
-//     .cm-s-easymde {
-//       border: 0;
-//       font-size: 22px;
-//     }
-//     .editor-toolbar {
-//       border: 0;
-//       background-color: rgba(0, 0, 0, 0.02);
-//     }
-//   }
-// }
 $white: rgb(251, 251, 251);
 $dark: rgb(41, 54, 73);
-.buttons {
-  position: absolute;
-  right: -30px;
-  top: 0;
-  border-radius: 10px;
-  opacity: 0;
-  z-index: 4;
-  svg {
-    width: 30px;
-    height: 30px;
-    border-radius: 3px;
-    cursor: pointer;
-    display: block;
-    // position: absolute;
-    // z-index: 3;
-    path {
-      color: $dark;
-    }
-  }
-  svg:hover {
-    transform: scale(1.2);
-  }
-}
-
 .root {
   border-radius: 3px;
-  // overflow: hidden;
   margin: 5px;
   position: relative;
-  // clip-path: inset(0);
   width: calc(33.333% - 10px);
   height: 300px;
   z-index: 3;
@@ -81,146 +14,109 @@ $dark: rgb(41, 54, 73);
     }
   }
   &Image {
-    * {
-    color: #fff !important;
+    .wrapper {
+      background-color: rgba(0, 0, 0, 0.5);
     }
-    .buttons {
-    background-color: $dark;
+    .tags *,
+    .title *,
+    .editor *,
+    .TagsBlock * {
+      color: $white;
+      ::placeholder {
+        opacity: 1;
+      }
     }
   }
-  &Image .wrapper {
-    background-color: rgba(0, 0, 0, 0.3);
-  }
-  &:hover {
-    .buttons {
-    opacity: 1;
-  }
-}}
-
-.image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  object-position: center;
-  left: 0;
-  top: 0;
-  z-index: -1;
-}
-
-.wrapper {
-  padding: 15px;
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.content {
-  margin: 30px 0 50px;
-
-  p {
-    font-size: 22px;
-    line-height: 36px;
-  }
-}
-
-.indention {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-
-  .postDate {
-    font-size: 14px;
-    font-weight: 900;
-  }
-}
-.text {
-  flex: 1 1 auto;
-  max-height: 100px;
-  overflow: hidden;
-}
-.title {
-  font-size: 28px;
-  margin: 0;
-
-  &Full {
-    font-size: 42px;
-    font-weight: 900;
-  }
-}
-
-.tags {
-  padding: 0;
-  margin: 0 -10px;
-}
-
-.postDetails {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  li {
-    display: inline-flex;
-    align-items: center;
-    font-size: 14px;
-    margin-right: 20px;
-
+  .buttons {
+    position: absolute;
+    right: -30px;
+    top: 0;
+    border-radius: 10px;
+    z-index: 4;
     svg {
-      opacity: 0.5;
-      font-size: 18px;
-      margin-right: 5px;
+      width: 30px;
+      height: 30px;
+      border-radius: 3px;
+      cursor: pointer;
+      display: block;
+      &:hover {
+        transform: scale(1.2);
+      }
+      path {
+        color: $dark;
+      }
     }
   }
-}
-
-.skeleton {
-  // background-color: #fff;
-  border: 1px solid #dedede;
-  border-radius: 6px;
-  overflow: hidden;
-  margin-bottom: 15px;
-
-  &Content {
-    padding: 20px;
+  .editor {
+    :global {
+      height: 100%;
+      .cm-s-easymde {
+        border: 0;
+        height: 100%;
+      }
+      .EasyMDEContainer {
+        .CodeMirror {
+          padding: 0;
+          background-color: transparent;
+        }
+        .editor-toolbar {
+          padding: 0;
+          margin: 0;
+          border: 0;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          .separator{
+            opacity: 0;
+          }
+          button {
+            padding: 0;
+            &:hover{
+              transform: scale(1.2);
+              background-color: transparent;
+              border: none;
+              outline: none;
+            }
+          }
+        }
+      }
+    }
   }
 
-  &Info {
-    margin-left: 50px;
+  .image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    object-position: center;
+    left: 0;
+    top: 0;
+    z-index: -1;
   }
-}
 
-.skeletonUser {
-  display: flex;
-
-  &Details {
+  .wrapper {
+    padding: 15px;
+    height: calc(100% - 30px);
     display: flex;
     flex-direction: column;
-  }
-}
+    overflow: hidden;
+    .title {
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
 
-.skeletonTags {
-  display: flex;
-
-  span {
-    margin-right: 15px;
-  }
-}
-
-.editButtons {
-  position: absolute;
-  right: 15px;
-  top: 15px;
-  border-radius: 10px;
-  opacity: 0;
-  svg {
-    width: 30px;
-    height: 30px;
-    border-radius: 3px;
-    cursor: pointer;
-    path {
-      color: $dark;
+      &Full {
+        font-size: 42px;
+        font-weight: 900;
+      }
     }
-  }
-  svg:hover {
-    transform: scale(1.2);
+
+    .TagsBlock {
+      padding: 0;
+      margin: 0 -10px;
+    }
   }
 }

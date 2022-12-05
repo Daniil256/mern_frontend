@@ -1,26 +1,12 @@
 import React from "react";
 import Skeleton from "@mui/material/Skeleton";
 import styles from './TagsBlock.module.scss'
-import { useDispatch } from "react-redux";
-import { fetchPostsSortByTag } from "../redux/slices/posts";
-import { useNavigate } from "react-router";
+import clsx from 'clsx';
 
-export const TagsBlock = ({ items, isLoading, isEditable, setTags }) => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
+export const TagsBlock = ({ items, isLoading, imageUrl, add, postsSortByTag }) => {
 
-  const postsSortByTag = (tagName) => {
-    if (isEditable) {
-      const index = items.indexOf(tagName)
-      items.splice(index, 1)
-      setTags([...items])
-    } else {
-      navigate(`/`)
-      dispatch(fetchPostsSortByTag(tagName.replace(/#/, '')))
-    }
-  }
   return (
-    <div className={styles.TagsBlock}>
+    <div className={clsx(styles.TagsBlock, { [styles.TagsBlockImage]: imageUrl }, { [styles.TagsBlockAdd]: add })}>
       {isLoading
         ?
         [...Array(10)].map((_, i) =>

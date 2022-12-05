@@ -1,5 +1,5 @@
 export const writeDate = (date) => {
-    const dateAt = new Date(Date.parse(date))
+    const dateAt = new Date(date)
     const writeTime = (time) => {
         if (time < 10) {
             return `0${time}`

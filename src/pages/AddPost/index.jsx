@@ -1,7 +1,5 @@
-import React, { useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import TextField from '@mui/material/TextField'
-import Paper from '@mui/material/Paper'
-import Button from '@mui/material/Button'
 import SimpleMDE from 'react-simplemde-editor'
 import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
@@ -12,95 +10,89 @@ import clsx from 'clsx';
 import axios, { baseURL } from '../../utils/axios'
 import 'easymde/dist/easymde.min.css'
 import styles from './AddPost.module.scss'
-import { Navigate, useNavigate, useParams } from 'react-router'
+import { Navigate } from 'react-router'
 import isAuth from '../../utils/isAuth'
-import { TagsBlock, UserInfo } from '../../components'
-import { fetchCreatePost, fetchPosts } from '../../redux/slices/posts'
-import { useDispatch,useSelector} from 'react-redux'
-import ReactMarkdown from 'react-markdown'
+import { TagsBlock } from '../../components'
+import { fetchCreatePost, fetchPostsSortByTag, fetchUpdatePost } from '../../redux/slices/posts'
+import { useDispatch } from 'react-redux'
 
-export const AddPost = () => {
-  const user = useSelector(state => state.auth.data)
+export const AddPost = ({ id, editTitle, index, editText, editImageUrl, editTags, setIsEdit, setIsAddNote }) => {
+  const dispatch = useDispatch()
+  const inputFileRef = useRef(null)
 
+  const [error, setError] = useState('')
+  const [title, setTitle] = useState(editTitle || '')
+  const [tag, setTag] = useState('')
 
-  const inputFileRef = React.useRef(null)
-  const { id } = useParams()
-
-  const [text, setText] = React.useState('')
-  const [error, setError] = React.useState('')
-  const [title, setTitle] = React.useState('')
-  const [tag, setTag] = React.useState('')
-  const [tags, setTags] = React.useState(['#ВРЕМЕНИ.NET', '#NOTIME'])
-  const [imageUrl, setImageUrl] = React.useState('')
-
+  const [post, setPost] = useState({
+    _id: id || Date.now(),
+    title: title,
+    text: editText || '',
+    tags: editTags ? [...editTags] : ['#ВРЕМЕНИ.NET', '#NOTIME'],
+    imageUrl: editImageUrl || '',
+  })
   const onChangeTags = (e) => {
     setTag(e)
     if (e[e.length - 1] === ' ') {
       e = "#" + e.replace(/[!@#$%^&*()-+=/?.,<>~`"№;:]/g, '').match(/\S/g).join('')
-      if (!tags.includes(e)) tags.push(e)
+      if (!post.tags.includes(e)) post.tags.push(e)
       setTag('')
     }
   }
 
-  useEffect(() => {
-    if (id) {
-      try {
-        axios.put(`/posts/${id}`).then(({ data }) => {
-          setTitle(data.title)
-          setText(data.text)
-          setImageUrl(data.imageUrl && data.imageUrl)
-          setTags(data.tags.join(' ').replace(/\#/))
-        })
-      } catch (err) {
-        console.log(err)
-        setError(err.message)
-      }
+  const postsSortByTag = (tagName) => {
+    if (setIsEdit || setIsAddNote) {
+      post.tags = post.tags.filter(item => item !== tagName)
+      setPost({ ...post })
+    } else {
+      dispatch(fetchPostsSortByTag(tagName.replace(/#/, '')))
     }
-  }, [])
+  }
 
   const handleChangeFile = async (e) => {
     try {
       const formData = new FormData()
       formData.append('image', e.target.files[0])
-      const { data } = await axios.post('/upload', formData)
-      setImageUrl(data.url)
+      const { data } = await axios.post('/uploads', formData)
+      post.imageUrl = data.url
+      setPost({ ...post })
     } catch (err) {
       console.log('Ошмбка ' + err)
       setError(err.message)
     }
   }
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
 
   const onClickRemoveImage = () => {
-    setImageUrl('')
+    post.imageUrl = ''
+    setPost({ ...post })
   }
-  const onHomeLocate = ()=>{
-    navigate('/')
+  const onHomeLocate = () => {
+    if (id) {
+      setIsEdit(false)
+    } else {
+      setIsAddNote(false)
+    }
   }
 
   const onChange = React.useCallback((value) => {
-    setText(value)
+    post.text = value
   }, [])
 
   const onSubmit = async () => {
     try {
-      const fields = {
-        _id: Date.now(),
-        title,
-        text,
-        tags,
-        imageUrl,
+      post.title = title
+      if (post.text || title) {
+        if (id) {
+          dispatch(fetchUpdatePost({ post, index }))
+          setIsEdit(false)
+        } else {
+          dispatch(fetchCreatePost(post))
+          setIsAddNote(false)
+        }
       }
-      dispatch(fetchCreatePost(fields))
-
-      navigate('/')
-
-      // id ? await axios.patch(`/posts/${id}`, fields)
-      //   : await axios.post('/posts', fields)
 
     } catch (err) {
-      console.log(err)
+      console.warn('onSubmit ' + err)
       setError(err.message)
     }
   }
@@ -108,9 +100,9 @@ export const AddPost = () => {
   const options = React.useMemo(
     () => ({
       spellChecker: false,
-      maxHeight: '400px',
+      maxHeight: '100%',
       autofocus: true,
-      placeholder: 'Введите текст...',
+      placeholder: 'Текст заметки',
       status: false,
       autosave: {
         enabled: true,
@@ -123,91 +115,51 @@ export const AddPost = () => {
     return <Navigate to="/" />
   }
   return (
-    // <Paper style={{ padding: 30 }}>
-    //   {error &&
-    //     <div style={{ fontWeight: 600, margin: '10px 0' }}>{error}</div>
-    //   }
-    //   <input type="file" id="input" ref={inputFileRef} onChange={handleChangeFile} hidden />
-    //   <Button variant="outlined" size="large" onClick={() => inputFileRef.current.click()}>
-    //     Загрузить превью
-    //   </Button>
-    //   {imageUrl && (
-    //     <>
-    //       <Button variant="contained" color="error" onClick={onClickRemoveImage}>
-    //         Удалить
-    //       </Button>
-    //       <img className={styles.image} src={baseURL + imageUrl} alt="Uploaded" />
-    //     </>
-    //   )}
-    //   <br />
-    //   <br />
-    //   <TextField
-    //     classes={{ root: styles.title }}
-    //     variant="standard"
-    //     placeholder="Заголовок статьи..."
-    //     value={title}
-    //     onChange={(e) => setTitle(e.target.value)}
-    //     fullWidth
-    //   />
-    //   <TagsBlock items={tags} isEditable setTags={setTags} />
-
-    //   <TextField
-    //     classes={{ root: styles.tags }}
-    //     variant="standard"
-    //     placeholder="Тэги"
-    //     value={tag}
-    //     onChange={(e) => onChangeTags(e.target.value)}
-    //     fullWidth />
-    //   <SimpleMDE className={styles.editor} value={text} onChange={onChange} options={options} />
-    //   <div className={styles.buttons}>
-    //     <Button size="large" variant="contained" onClick={onSubmit} disabled={!text}>
-    //       {id ? 'Сохранить' : 'Опубликовать'}
-    //     </Button>
-    //     <a href="/">
-    //       <Button size="large">Отмена</Button>
-    //     </a>
-    //   </div>
-    // </Paper>
-    <div className={clsx(styles.root, { [styles.rootFull]: false }, { [styles.rootImage]: imageUrl })}>
-     <div className={styles.buttons}>
-        <input type="file" id="input" ref={inputFileRef} onChange={handleChangeFile} hidden />
-        <ImageRoundedIcon onClick={() => inputFileRef.current.click()}/>
-        <SaveRoundedIcon onClick={onSubmit} disabled={!text}/>
-        <CancelRoundedIcon onClick={onHomeLocate}/>
-        <HideImageIcon onClick={onClickRemoveImage}/>
+    <div className={clsx(styles.root, { [styles.rootFull]: false }, { [styles.rootImage]: post.imageUrl })}>
+      <div className={clsx(styles.buttons)}>
+        <input type="file" id="input" ref={inputFileRef} onChange={handleChangeFile} hidden accept='image/*' />
+        <ImageRoundedIcon onClick={() => inputFileRef.current.click()} />
+        <SaveRoundedIcon onClick={onSubmit} />
+        <CancelRoundedIcon onClick={onHomeLocate} />
+        <HideImageIcon onClick={onClickRemoveImage} />
       </div>
-    
-    {imageUrl && (
-      <img
-        className={clsx(styles.image, { [styles.imageFull]: false })}
-        src={imageUrl}
-        alt={title}
-      />
-    )}
-    <div className={styles.wrapper}>
-      <div className={styles.indention}>
+
+      {post.imageUrl && (
+        <img
+          className={clsx(styles.image)}
+          src={baseURL+post.imageUrl}
+          alt={post.title}
+        />
+      )}
+      <div className={styles.wrapper}>
         <TextField
-        classes={{ root: styles.title }}
-        variant="standard"
-        placeholder="Заголовок статьи..."
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        fullWidth
-      />
-      <TagsBlock items={tags} isEditable setTags={setTags} />
-
-      <TextField
-        classes={{ root: styles.tags }}
-        variant="standard"
-        placeholder="Тэги"
-        value={tag}
-        onChange={(e) => onChangeTags(e.target.value)}
-        fullWidth />
-      <SimpleMDE className={styles.editor} value={text} onChange={onChange} options={options} />
-
+          className={clsx(styles.title)}
+          variant="standard"
+          placeholder="Заголовок"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          fullWidth
+        />
+        <SimpleMDE
+          className={clsx(styles.editor)}
+          value={post.text}
+          onChange={onChange}
+          options={options}
+        />
+        <TagsBlock
+          items={post.tags}
+          postsSortByTag={postsSortByTag}
+          imageUrl={post.imageUrl}
+          add
+        />
+        <TextField
+          className={clsx(styles.tags)}
+          variant="standard"
+          placeholder="Тэги"
+          value={tag}
+          onChange={(e) => onChangeTags(e.target.value)}
+          fullWidth />
+      </div>
     </div>
-  </div>
-  </div>
-
   )
 }

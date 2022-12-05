@@ -10,7 +10,7 @@ import isAuth from '../../utils/isAuth';
 import { fetchPosts, fetchTags } from '../../redux/slices/posts';
 import { fetchAllComments } from '../../redux/slices/comments';
 
-export const Header = () => {
+export const Header = ({ setIsAddNote }) => {
   const dispatch = useDispatch()
 
   const onClickLogout = () => {
@@ -22,6 +22,11 @@ export const Header = () => {
     dispatch(fetchPosts())
     dispatch(fetchTags())
     dispatch(fetchAllComments())
+    setIsAddNote(false)
+  }
+
+  const onAddPost = () => {
+    setIsAddNote(true)
   }
 
   return (
@@ -30,14 +35,12 @@ export const Header = () => {
         <div className={styles.inner}>
           <Link to='/' className={styles.logo} onClick={reloadPosts}>
             Времени.net
-          <span className={styles.border}></span>
-            </Link>
+            <span className={styles.border}></span>
+          </Link>
           <div className={styles.buttons}>
             {isAuth() ? (
               <>
-                <Link to="/add_note">
-                  <Button>Создать заметку</Button>
-                </Link>
+                <Button onClick={onAddPost}>Создать заметку</Button>
                 <Button onClick={onClickLogout}>Выйти</Button>
               </>
             ) : (

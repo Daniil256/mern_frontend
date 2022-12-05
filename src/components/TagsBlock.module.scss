@@ -1,16 +1,40 @@
 $white: rgb(251, 251, 251);
 $dark: rgb(41, 54, 73);
 .TagsBlock {
-    .tag {
-        cursor: pointer;
-        color: $dark;
-        display: inline-block;
-        line-height: 0.8;
-        padding: 5px 10px;
-        border-radius: 3px;
-        font-weight: 600;
-        &:hover {
-            transform: scale(1.2);
-        }
+  margin: 0 -10px;
+  .tag {
+    cursor: pointer;
+    color: $dark;
+    display: inline-block;
+    line-height: 0.8;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-weight: 600;
+    &:hover {
+      transform: scale(1.2);
     }
+  }
+  &Add .tag {
+    position: relative;
+    &:hover {
+      &::before,
+      &::after {
+        content: "";
+        position: absolute;
+        left: calc(50% - 15px);
+        top: 50%;
+        width: 30px;
+        height: 3px;
+        border-radius: 3px;
+        background-color: $dark;
+        transform: rotateZ(45deg);
+      }
+      &::after {
+        transform: rotateZ(-45deg);
+      }
+    }
+  }
+  &Image .tag {
+    color: $white;
+  }
 }
